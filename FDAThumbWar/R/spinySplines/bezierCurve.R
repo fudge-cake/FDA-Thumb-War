@@ -1,6 +1,9 @@
 # This object will function as a single cubic Bezier curve which will be used to
 # more complicated structures like Bezier-splines and B-splines.
 
+# TODO : Implement more general curves of different order.
+
+
 
 # checks that the parameter controlePoints is a matrix with 4 columns.
 check_controle_points <- function(object) {
@@ -26,4 +29,44 @@ check_controle_points <- function(object) {
 setClass("Bezier", slots = list(controlePoints = "numeric"),
          validity = check_controle_points())
 
-# TODO: add the function that interpolates between the controle points
+# Function that interpolates between the controle points
+point_at_t <- function(curve,t) {
+  coeff_mat <- matrix(c(1,   0,  0,  0,
+                        -3,  3,  0,  0,
+                        3,  -6,  3,  0,
+                        -1,  3, -3,  1),
+                      ncol = 4, byrow = TRUE)
+  t_vector <- matrix(c(1, t, t * t, t * t * t), ncol = 4)
+  factor <- t_vector %*% coeff_mat
+
+  x_vector <- matrix(c(curve@controlePoints[, 1],
+                       curve@controlePoints[, 2],
+                       curve@controlePoints[, 3],
+                       curve@controlePoints[, 4]),
+                     nrow = 4, byrow = TRUE)
+  factor[1, 1] * x_vector[1, ] + factor[1, 2] * x_vector[2, ] +
+    factor[1, 3] * x_vector[3, ] + factor[1, 4] * x_vector[4, ]
+}
+
+# Function that finds the derivative of the curve
+derivative_at_t <- function(curve,t) {
+  coeff_mat <- matrix(c(1,   0,  0,  0,
+                        -3,  3,  0,  0,
+                        3,  -6,  3,  0,
+                        -1,  3, -3,  1),
+                      ncol = 4, byrow = TRUE)
+  t_vector <- matrix(c(0, 1, 2 * t, 3 * t * t), ncol = 4)
+  factor <- t_vector %*% coeff_mat
+
+  x_vector <- matrix(c(curve@controlePoints[, 1],
+                       curve@controlePoints[, 2],
+                       curve@controlePoints[, 3],
+                       curve@controlePoints[, 4]),
+                     nrow = 4, byrow = TRUE)
+  factor[1, 1] * x_vector[1, ] + factor[1, 2] * x_vector[2, ] +
+    factor[1, 3] * x_vector[3, ] + factor[1, 4] * x_vector[4, ]
+}
+
+
+# Constructor for the Bezier object
+bezier <- function(point) new("Bezier", controlePoints = point)
