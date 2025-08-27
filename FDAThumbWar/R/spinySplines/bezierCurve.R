@@ -26,8 +26,8 @@ check_controle_points <- function(object) {
 #
 # @slots controlePoints : a matrix of 4 vectors that are the points
 # the curve interpolates between.
-setClass("Bezier", slots = list(controlePoints = "numeric"),
-         validity = check_controle_points())
+setClass("Bezier", slots = list(controlePoints = "numeric"))
+setValidity("Bezier", check_controle_points)
 
 # Function that interpolates between the controle points
 point_at_t <- function(curve,t) {
@@ -70,3 +70,15 @@ derivative_at_t <- function(curve,t) {
 
 # Constructor for the Bezier object
 bezier <- function(point) new("Bezier", controlePoints = point)
+
+# Plotting function
+plot_bezier <- function(curve, start = 0, end = 1, step = .01) {
+  tvec <- seq(from = start, to = end, by = step)
+  point <- point_at_t(curve = curve, tvec = tvec)
+  x <- point[,1]
+  y <- point[,2]
+  
+  plot.new()
+  plot.default(x=x,y=y, type='n')
+  lines(x,y)
+}
